@@ -82,12 +82,12 @@ function backprop_weighted_q!(tree, gamma, visited_threshold=-1)
         # update Q at parent
         # 更新父节点的Q值
         parent = get(node.parent)
-        # 计算节点奖励
+        # 计算当前节点相对于其父节点的奖励：因为是action value，因此要基于父状态
         node_reward = tree.accumulated_rewards[node.id] - tree.accumulated_rewards[parent.id]
         mn = if is_leaf(node)
             mean(tree.children_qs[nix])
         else
-            sum(avisitedc[nix] .* tree.children_qs[nix]) ./ sum(avisitedc[nix])
+            sum(avisitedc[nix] ./ sum(avisitedc[nix] .* tree.children_qs[nix]))
         end
         # 更新父节点的Q值
         tree.children_qs[parent.id][node.action_ix] = node_reward + gamma*mn
